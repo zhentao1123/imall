@@ -27,7 +27,7 @@ public class JwtUtils {
     /**
      * 认证服务器许可我们的网关的clientId(需要在oauth_client_details表中配置)
      */
-    private static final String CLIENT_ID = "tulingmall-gateway";
+    private static final String CLIENT_ID = "client";
 
     /**
      * 认证服务器许可我们的网关的client_secret(需要在oauth_client_details表中配置)
@@ -37,7 +37,7 @@ public class JwtUtils {
     /**
      * 认证服务器暴露的获取token_key的地址
      */
-    private static final String AUTH_TOKEN_KEY_URL = "http://tulingmall-auth/oauth/token_key";
+    private static final String AUTH_TOKEN_KEY_URL = "http://localhost:70/oauth/token_key";
 
     /**
      * 请求头中的 token的开始
@@ -56,17 +56,17 @@ public class JwtUtils {
         //第一步:封装请求头
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        headers.setBasicAuth(CLIENT_ID,CLIENT_SECRET);
+        headers.setBasicAuth(CLIENT_ID, CLIENT_SECRET);
         HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(null, headers);
 
         //第二步:远程调用获取token_key
         try {
             ResponseEntity<Map> response = restTemplate.exchange(AUTH_TOKEN_KEY_URL, HttpMethod.GET, entity, Map.class);
             String tokenKey = response.getBody().get("value").toString();
-            log.info("去认证服务器获取Token_Key:{}",tokenKey);
+            log.info("去认证服务器获取Token_Key:{}", tokenKey);
             return tokenKey;
         }catch (Exception e) {
-            log.error("远程调用认证服务器获取Token_Key失败:{}",e.getMessage());
+            log.error("远程调用认证服务器获取Token_Key失败:{}", e.getMessage());
             throw new GateWayException(ResultCode.GET_TOKEN_KEY_ERROR);
         }
     }
@@ -83,7 +83,7 @@ public class JwtUtils {
         String tokenKey = getTokenKeyByRemoteCall(restTemplate);
         try{
             //把获取的公钥开头和结尾替换掉
-            String dealTokenKey =tokenKey.replaceAll("\\-*BEGIN PUBLIC KEY\\-*", "").replaceAll("\\-*END PUBLIC KEY\\-*", "").trim();
+            String dealTokenKey = tokenKey.replaceAll("\\-*BEGIN PUBLIC KEY\\-*", "").replaceAll("\\-*END PUBLIC KEY\\-*", "").trim();
             java.security.Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
             X509EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(Base64.decodeBase64(dealTokenKey));
             KeyFactory keyFactory = KeyFactory.getInstance("RSA");

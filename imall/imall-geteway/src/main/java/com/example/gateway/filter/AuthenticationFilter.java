@@ -49,7 +49,6 @@ public class AuthenticationFilter implements GlobalFilter, InitializingBean {
         }
         //log.info("需要认证的URL:{}",currentUrl);
 
-
         //2. 获取token
         // 从请求头中解析 Authorization  value:  bearer xxxxxxx
         // 或者从请求参数中解析 access_token
@@ -66,32 +65,26 @@ public class AuthenticationFilter implements GlobalFilter, InitializingBean {
         // 拿到token后，通过公钥（需要从授权服务获取公钥）校验
         // 校验失败或超时抛出异常
         //第三步 校验我们的jwt 若jwt不对或者超时都会抛出异常
-        Claims claims = JwtUtils.validateJwtToken(authHeader,publicKey);
+        Claims claims = JwtUtils.validateJwtToken(authHeader, publicKey);
 
         //4. 校验通过后，从token中获取的用户登录信息存储到请求头中
         //第四步 把从jwt中解析出来的 用户登陆信息存储到请求头中
-        ServerWebExchange webExchange = wrapHeader(exchange,claims);
+        ServerWebExchange webExchange = wrapHeader(exchange, claims);
 
         return chain.filter(webExchange);
     }
 
-    private ServerWebExchange wrapHeader(ServerWebExchange serverWebExchange,Claims claims) {
-
+    private ServerWebExchange wrapHeader(ServerWebExchange serverWebExchange, Claims claims) {
         String loginUserInfo = JSON.toJSONString(claims);
-
         //log.info("jwt的用户信息:{}",loginUserInfo);
-
         String memberId = claims.get("additionalInfo", Map.class).get("memberId").toString();
-
-        String nickName = claims.get("additionalInfo",Map.class).get("nickName").toString();
-
+        String nickName = claims.get("additionalInfo", Map.class).get("nickName").toString();
         //向headers中放文件，记得build
         ServerHttpRequest request = serverWebExchange.getRequest().mutate()
-                .header("username",claims.get("user_name",String.class))
+                .header("username",claims.get("user_name", String.class))
                 .header("memberId",memberId)
                 .header("nickName",nickName)
                 .build();
-
         //将现在的request 变成 change对象
         return serverWebExchange.mutate().request(request).build();
     }
@@ -100,8 +93,8 @@ public class AuthenticationFilter implements GlobalFilter, InitializingBean {
         //路径匹配器(简介SpringMvc拦截器的匹配器)
         //比如/oauth/** 可以匹配/oauth/token    /oauth/check_token等
         PathMatcher pathMatcher = new AntPathMatcher();
-        for(String skipPath:notAuthUrlProperties.getShouldSkipUrls()) {
-            if(pathMatcher.match(skipPath,currentUrl)) {
+        for(String skipPath : notAuthUrlProperties.getShouldSkipUrls()) {
+            if(pathMatcher.match(skipPath, currentUrl)) {
                 return true;
             }
         }
@@ -119,8 +112,8 @@ public class AuthenticationFilter implements GlobalFilter, InitializingBean {
     @Override
     public void afterPropertiesSet() throws Exception {
         //获取公钥  TODO
-        // http://tulingmall-auth/oauth/token_key
-        this.publicKey = JwtUtils.genPulicKey(restTemplate);
+        // http://imall-auth/oauth/token_key
+        this.publicKey = null;//JwtUtils.genPulicKey(restTemplate);
     }
 }
 

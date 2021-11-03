@@ -24,6 +24,7 @@
     <module>imall-mbg</module>
     <module>imall-member</module>
     <module>imall-geteway</module>
+      <module>oauth2-server</module>
   </modules>
 
   <properties>
