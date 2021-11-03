@@ -1,0 +1,9 @@
+server:
+  port: 70
+
+spring:
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+        namespace: 80a98d11-492c-4008-85aa-32d889e9b0d0  #环境隔离
